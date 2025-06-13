@@ -1,9 +1,5 @@
 package com.prog.arith.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -11,8 +7,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class OpenAiService {
+
+  private static final Logger logger = LoggerFactory.getLogger(OpenAiService.class);
 
   private final String apiKey;
   private final String apiUrl = "https://api.openai.com/v1/chat/completions";
@@ -20,15 +25,23 @@ public class OpenAiService {
   public OpenAiService() {
     // Récupération de la clé API depuis la variable d'environnement
     this.apiKey = System.getenv("OPENAI_API_KEY");
+    // Ne pas lancer d'exception, juste logger un avertissement
     if (this.apiKey == null || this.apiKey.isEmpty()) {
-      throw new IllegalStateException(
-          "La variable d'environnement OPENAI_API_KEY n'est pas définie");
+      logger.warn("La variable d'environnement OPENAI_API_KEY n'est pas définie");
     }
   }
 
+  protected RestTemplate getRestTemplate() {
+    return new RestTemplate();
+  }
+
   public String getMalagasyDefinition(String teny) {
+    if (apiKey == null || apiKey.isEmpty()) {
+      return "Impossible de contacter l'API OpenAI: clé API non définie";
+    }
+
     try {
-      RestTemplate restTemplate = new RestTemplate();
+      RestTemplate restTemplate = getRestTemplate();
 
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
@@ -56,8 +69,7 @@ public class OpenAiService {
       ResponseEntity<Map> response = restTemplate.postForEntity(apiUrl, entity, Map.class);
 
       if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-        List<Map<String, Object>> choices =
-            (List<Map<String, Object>>) response.getBody().get("choices");
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
         if (choices != null && !choices.isEmpty()) {
           Map<String, Object> firstChoice = choices.get(0);
           Map<String, Object> firstMessage = (Map<String, Object>) firstChoice.get("message");
