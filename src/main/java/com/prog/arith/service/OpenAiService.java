@@ -1,18 +1,17 @@
 package com.prog.arith.service;
 
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 @Service
 public class OpenAiService {
@@ -69,7 +68,8 @@ public class OpenAiService {
       ResponseEntity<Map> response = restTemplate.postForEntity(apiUrl, entity, Map.class);
 
       if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
+        List<Map<String, Object>> choices =
+            (List<Map<String, Object>>) response.getBody().get("choices");
         if (choices != null && !choices.isEmpty()) {
           Map<String, Object> firstChoice = choices.get(0);
           Map<String, Object> firstMessage = (Map<String, Object>) firstChoice.get("message");
