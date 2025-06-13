@@ -1,17 +1,18 @@
 package com.prog.arith.service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class OpenAiService {
@@ -22,25 +23,19 @@ public class OpenAiService {
   private final String apiUrl = "https://api.openai.com/v1/chat/completions";
 
   public OpenAiService() {
-    // Récupération de la clé API depuis la variable d'environnement
     this.apiKey = System.getenv("OPENAI_API_KEY");
-    // Ne pas lancer d'exception, juste logger un avertissement
     if (this.apiKey == null || this.apiKey.isEmpty()) {
-      logger.warn("La variable d'environnement OPENAI_API_KEY n'est pas définie");
+      logger.warn("Tsy voafaritra ny fanalahidy API OPENAI_API_KEY");
     }
-  }
-
-  protected RestTemplate getRestTemplate() {
-    return new RestTemplate();
   }
 
   public String getMalagasyDefinition(String teny) {
     if (apiKey == null || apiKey.isEmpty()) {
-      return "Impossible de contacter l'API OpenAI: clé API non définie";
+      return "Tsy afaka mifandray amin'ny API OpenAI: tsy voafaritra ny fanalahidy API";
     }
 
     try {
-      RestTemplate restTemplate = getRestTemplate();
+      RestTemplate restTemplate = new RestTemplate();
 
       HttpHeaders headers = new HttpHeaders();
       headers.setContentType(MediaType.APPLICATION_JSON);
@@ -53,12 +48,12 @@ public class OpenAiService {
 
       Map<String, String> systemMessage = new HashMap<>();
       systemMessage.put("role", "system");
-      systemMessage.put("content", "Vous êtes un professeur de langue malgache.");
+      systemMessage.put("content", "Mpampianatra teny malagasy ianao. Omeo famaritana mazava sy fohifohy amin'ny teny malagasy ireo teny anontaniana anao. Aza mampiasa teny vahiny fa teny malagasy ihany.");
       messages.add(systemMessage);
 
       Map<String, String> userMessage = new HashMap<>();
       userMessage.put("role", "user");
-      userMessage.put("content", "Définis le mot malgache : " + teny);
+      userMessage.put("content", "Inona no dikan'ny teny malagasy hoe: " + teny);
       messages.add(userMessage);
 
       request.put("messages", messages);
@@ -68,8 +63,7 @@ public class OpenAiService {
       ResponseEntity<Map> response = restTemplate.postForEntity(apiUrl, entity, Map.class);
 
       if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-        List<Map<String, Object>> choices =
-            (List<Map<String, Object>>) response.getBody().get("choices");
+        List<Map<String, Object>> choices = (List<Map<String, Object>>) response.getBody().get("choices");
         if (choices != null && !choices.isEmpty()) {
           Map<String, Object> firstChoice = choices.get(0);
           Map<String, Object> firstMessage = (Map<String, Object>) firstChoice.get("message");
@@ -77,12 +71,12 @@ public class OpenAiService {
             return (String) firstMessage.get("content");
           }
         }
-        return "Aucune définition trouvée.";
+        return "Tsy nahitana famaritana.";
       } else {
-        return "Erreur lors de la requête à l'API OpenAI.";
+        return "Nisy olana tamin'ny fangatahana tamin'ny API OpenAI.";
       }
     } catch (Exception e) {
-      return "Exception : " + e.getMessage();
+      return "Nisy hadisoana: " + e.getMessage();
     }
   }
 }
