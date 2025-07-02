@@ -25,7 +25,7 @@ repositories {
 }
 
 java {
-    group = 'com.prog.arith'
+    group = 'com.example.demo'
     sourceCompatibility = '21'
     targetCompatibility = '21'
 }
